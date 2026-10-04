@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Pong Game</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Start Screen -->
+  <div id="startScreen" class="screen screen-active">
+    <div class="screen-content">
+      <h1 class="game-title">PONG</h1>
+      <p class="game-subtitle">Classic Arcade Game</p>
+      
+      <div class="controls-info">
+        <div class="control-section">
+          <h3>🖱️ Desktop Controls</h3>
+          <p><strong>Left Paddle:</strong> Mouse Movement + ⬆️ ⬇️</p>
+          <p><strong>Right Paddle:</strong> Computer AI</p>
+        </div>
+        
+        <div class="control-section">
+          <h3>📱 Mobile Controls</h3>
+          <p><strong>Left Paddle:</strong> Touch & Drag or Tilt</p>
+          <p><strong>Right Paddle:</strong> Computer AI</p>
+        </div>
+      </div>
+
+      <div class="settings">
+        <label class="checkbox-label">
+          <input type="checkbox" id="soundToggle" checked />
+          <span>🔊 Sound Effects</span>
+        </label>
+        
+        <div class="difficulty-selector">
+          <label>Difficulty:</label>
+          <select id="difficultySelect">
+            <option value="easy">Easy</option>
+            <option value="normal" selected>Normal</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+    </div>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="gameScreen" class="screen">
+    <div class="game-container">
+      <div class="game-header">
+        <div class="scoreboard">
+          <span id="left-score">0</span> : <span id="right-score">0</span>
+        </div>
+        <button class="btn btn-small" onclick="pauseGame()">⏸️ Pause</button>
+      </div>
+
+      <canvas id="game"></canvas>
+
+      <div class="game-stats">
+        <span id="ball-speed">Speed: 0</span>
+        <span id="game-fps">FPS: 0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Screen -->
+  <div id="pauseScreen" class="screen">
+    <div class="screen-content">
+      <h2>PAUSED</h2>
+      <button class="btn btn-primary" onclick="resumeGame()">Resume</button>
+      <button class="btn btn-secondary" onclick="goToMenu()">Menu</button>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="gameOverScreen" class="screen">
+    <div class="screen-content">
+      <h2>GAME OVER</h2>
+      <div id="finalStats"></div>
+      <button class="btn btn-primary" onclick="startGame()">Play Again</button>
+      <button class="btn btn-secondary" onclick="goToMenu()">Menu</button>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
