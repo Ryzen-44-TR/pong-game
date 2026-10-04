@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🕹️ ARCADE PONG CHAMPIONSHIP 🕹️</title>
+  <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: "Arial Black", sans-serif;
+  background: #0a0e1a;
+  color: #fff;
+  overflow: hidden;
+}
+
+:root {
+  --theme-primary: #00ff88;
+  --theme-secondary: #ff00ff;
+  --theme-accent: #00ccff;
+  --text-bright: #ffffff;
+  --text-light: #e0f0ff;
+}
+
+body.theme-neon {
+  --theme-primary: #00ff88;
+  --theme-secondary: #ff00ff;
+  --theme-accent: #00ccff;
+  background: linear-gradient(135deg, #0a0e1a, #1a0a2e, #0f0f2a);
+}
+
+body.theme-sunset {
+  --theme-primary: #ffaa00;
+  --theme-secondary: #ff6600;
+  --theme-accent: #ffff00;
+  background: linear-gradient(135deg, #2a1a0a, #3a1a0a, #2a0a1a);
+}
+
+body.theme-ocean {
+  --theme-primary: #00ddff;
+  --theme-secondary: #0099ff;
+  --theme-accent: #00ffff;
+  background: linear-gradient(135deg, #0a1a3a, #0a2a4a, #1a1a3a);
+}
+
+body.theme-forest {
+  --theme-primary: #00ff44;
+  --theme-secondary: #44ff00;
+  --theme-accent: #ffff00;
+  background: linear-gradient(135deg, #0a2a1a, #1a3a2a, #0a2a3a);
+}
+
+body.theme-cyber {
+  --theme-primary: #ff00ff;
+  --theme-secondary: #00ffff;
+  --theme-accent: #ffff00;
+  background: linear-gradient(135deg, #1a0a2a, #2a0a1a, #1a1a0a);
+}
+
+body.theme-crystal {
+  --theme-primary: #ffddff;
+  --theme-secondary: #ddffff;
+  --theme-accent: #ffffdd;
+  background: linear-gradient(135deg, #2a3a4a, #3a2a4a, #2a4a3a);
+}
+
+body.theme-fire {
+  --theme-primary: #ffaa00;
+  --theme-secondary: #ff0000;
+  --theme-accent: #ffff00;
+  background: linear-gradient(135deg, #3a1a0a, #4a0a0a, #3a0a1a);
+}
+
+#gameContainer {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.screen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  z-index: 100;
+  backdrop-filter: blur(5px);
+}
+
+.screen.active { display: grid; }
+
+#loadingScreen {
+  background: rgba(10, 14, 26, 0.98);
+}
+
+#menuScreen {
+  background: rgba(10, 14, 26, 0.95);
+}
+
+#gameOverScreen {
+  background: rgba(10, 14, 26, 0.98);
+}
+
+.menu-container {
+  width: min(95vw, 520px);
+  background: linear-gradient(135deg, rgba(20, 30, 50, 0.95), rgba(30, 20, 50, 0.95));
+  border: 4px solid var(--theme-primary);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 0 40px var(--theme-primary), inset 0 0 30px rgba(255,255,255,0.08);
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  color: var(--theme-primary);
+  text-shadow: 0 0 20px var(--theme-primary), 0 0 40px var(--theme-secondary);
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+  animation: titleGlow 2s infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% { text-shadow: 0 0 20px var(--theme-primary), 0 0 40px var(--theme-secondary); }
+  50% { text-shadow: 0 0 40px var(--theme-primary), 0 0 60px var(--theme-secondary), 0 0 80px var(--theme-accent); }
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--theme-accent);
+  letter-spacing: 3px;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+
+.menu-section {
+  margin: 20px 0;
+}
+
+.button-group {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.btn {
+  padding: 14px 24px;
+  border: 3px solid var(--theme-primary);
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 255, 0.1));
+  color: var(--theme-primary);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  cursor: pointer;
+  border-radius: 12px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.btn:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 204, 255, 0.3));
+  box-shadow: 0 0 30px var(--theme-primary), 0 0 60px var(--theme-secondary);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn.secondary {
+  border-color: var(--theme-secondary);
+  color: var(--theme-secondary);
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+}
+
+.btn.secondary:hover {
+  box-shadow: 0 0 30px var(--theme-secondary), 0 0 60px var(--theme-primary);
+}
+
+.theme-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.theme-btn {
+  padding: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.theme-btn:hover {
+  border-color: var(--theme-primary);
+  color: var(--theme-primary);
+  box-shadow: 0 0 10px var(--theme-primary);
+}
+
+.theme-btn.active {
+  border-color: var(--theme-primary);
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 255, 0.2));
+  color: var(--theme-primary);
+  box-shadow: 0 0 20px var(--theme-primary);
+}
+
+.settings {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.setting-item label {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.setting-item select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--theme-primary);
+  color: var(--theme-primary);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toggle-switch {
+  width: 50px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--theme-primary);
+  border-radius: 14px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-switch.on {
+  background: var(--theme-primary);
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: all 0.3s ease;
+}
+
+.toggle-switch.on::after {
+  left: 26px;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+.hud {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 50;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.hud-item {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));
+  border: 2px solid var(--theme-primary);
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+  color: var(--theme-primary);
+}
+
+.score-display {
+  font-size: 2rem;
+  letter-spacing: 3px;
+  text-shadow: 0 0 15px var(--theme-primary);
+}
+
+.controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  z-index: 50;
+}
+
+.control-btn {
+  width: 70px;
+  height: 70px;
+  border: 3px solid var(--theme-primary);
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 255, 0.1));
+  color: var(--theme-primary);
+  font-size: 2rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 15px var(--theme-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 204, 255, 0.3));
+  transform: scale(1.05);
+  box-shadow: 0 0 30px var(--theme-primary);
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+}
+
+.pause-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border: 2px solid var(--theme-secondary);
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--theme-secondary);
+  font-weight: 900;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 50;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.game-over-panel {
+  width: min(90vw, 500px);
+  background: linear-gradient(135deg, rgba(20, 30, 50, 0.98), rgba(30, 20, 50, 0.98));
+  border: 4px solid var(--theme-secondary);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 0 50px var(--theme-secondary), inset 0 0 30px rgba(255,255,255,0.08);
+  text-align: center;
+}
+
+.game-over-title {
+  font-size: 3rem;
+  color: var(--theme-secondary);
+  text-shadow: 0 0 20px var(--theme-secondary);
+  letter-spacing: 3px;
+  margin-bottom: 24px;
+  animation: pulse 0.8s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.score-table {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.score-row:last-child {
+  border-bottom: none;
+}
+
+.score-label {
+  color: var(--theme-accent);
+}
+
+.score-value {
+  color: var(--theme-primary);
+  font-weight: 900;
+  text-shadow: 0 0 10px var(--theme-primary);
+}
+
+.winner-message {
+  font-size: 1.5rem;
+  color: var(--theme-accent);
+  margin: 20px 0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.stats-panel {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 10px;
+  margin: 15px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--theme-accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  color: var(--theme-primary);
+  font-weight: 900;
+}
+
+.high-scores {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border: 2px solid var(--theme-accent);
+}
+
+.high-scores h3 {
+  color: var(--theme-accent);
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.score-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.score-entry:last-child {
+  border-bottom: none;
+}
+
+.score-rank {
+  color: var(--theme-primary);
+  font-weight: 900;
+  width: 30px;
+}
+
+.score-name {
+  color: var(--theme-accent);
+  flex: 1;
+  text-align: left;
+  padding: 0 10px;
+}
+
+.score-points {
+  color: var(--theme-secondary);
+  font-weight: 900;
+}
+
+.loading-screen-content {
+  text-align: center;
+}
+
+.loading-bar {
+  width: 300px;
+  height: 20px;
+  border: 3px solid var(--theme-primary);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  margin: 20px auto;
+  overflow: hidden;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--theme-primary), var(--theme-secondary));
+  width: 0%;
+  animation: loading 3s ease-in-out forwards;
+}
+
+@keyframes loading {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+.popup-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--theme-primary);
+  text-shadow: 0 0 20px var(--theme-primary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  pointer-events: none;
+  z-index: 40;
+  animation: popupAppear 0.5s ease-out;
+}
+
+@keyframes popupAppear {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+.power-indicator {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+  border: 2px solid var(--theme-accent);
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: var(--theme-accent);
+  font-weight: 900;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.power-indicator.active {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .controls {
+    bottom: 15px;
+    gap: 15px;
+  }
+  .control-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  .hud {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    font-size: 1.2rem;
+  }
+}
+  </style>
+</head>
+<body class="theme-neon">
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="loadingScreen" class="screen active">
+      <div class="menu-container">
+        <div class="loading-screen-content">
+          <div class="title">🕹️ ARCADE PONG</div>
+          <div class="subtitle">CHAMPIONSHIP EDITION</div>
+          <div class="loading-bar">
+            <div class="loading-bar-fill"></div>
+          </div>
+          <div id="loadingText" style="margin-top: 20px; font-size: 1.2rem; color: var(--theme-primary); letter-spacing: 2px;">YÜKLENİYOR...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="menuScreen" class="screen">
+      <div class="menu-container">
+        <div class="title">🏆 PING PONG</div>
+        <div class="subtitle">Arcade Championship</div>
+
+        <div class="button-group">
+          <button class="btn" id="playBtn">Oyna</button>
+        </div>
+
+        <div class="menu-section">
+          <div style="color: var(--theme-accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 900;">Tema Seç</div>
+          <div class="theme-selector">
+            <button class="theme-btn active" data-theme="neon">Neon</button>
+            <button class="theme-btn" data-theme="sunset">Sunset</button>
+            <button class="theme-btn" data-theme="ocean">Ocean</button>
+            <button class="theme-btn" data-theme="forest">Forest</button>
+            <button class="theme-btn" data-theme="cyber">Cyber</button>
+            <button class="theme-btn" data-theme="crystal">Crystal</button>
+            <button class="theme-btn" data-theme="fire">Fire</button>
+          </div>
+        </div>
+
+        <div class="settings">
+          <div class="setting-item">
+            <label>Ses</label>
+            <div class="toggle-switch on" id="soundToggle"></div>
+          </div>
+          <div class="setting-item">
+            <label>Zorluk</label>
+            <select id="difficultySelect">
+              <option value="easy">KOLAY</option>
+              <option value="normal" selected>NORMAL</option>
+              <option value="hard">ZOR</option>
+              <option value="insane">CEHENNEM</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label>Hedef Skor</label>
+            <select id="targetSelect">
+              <option value="3">3</option>
+              <option value="5" selected>5</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="high-scores" id="highScoresPanel">
+          <h3>🏅 En Yüksek Skorlar</h3>
+          <div id="highScoresList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="gameScreen" class="screen">
+      <div class="hud">
+        <div class="hud-item" id="themeDisplay">NEON ARENA</div>
+        <div class="hud-item">
+          <span id="playerScore">0</span> <span style="color: var(--theme-secondary);">:</span> <span id="enemyScore">0</span>
+        </div>
+      </div>
+      <div class="power-indicator" id="powerIndicator"></div>
+      <button class="pause-btn" id="pauseBtn">DURAKLAT</button>
+      <div class="controls">
+        <button class="control-btn" id="leftBtn">◀</button>
+        <button class="control-btn" id="rightBtn">▶</button>
+      </div>
+    </div>
+
+    <div id="gameOverScreen" class="screen">
+      <div class="game-over-panel">
+        <div class="game-over-title">OYUN BİTTİ</div>
+        
+        <div class="score-table">
+          <div class="score-row">
+            <span class="score-label">OYUNCU</span>
+            <span class="score-value" id="finalPlayerScore">0</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">RAKİP</span>
+            <span class="score-value" id="finalEnemyScore">0</span>
+          </div>
+        </div>
+
+        <div class="winner-message" id="winnerMessage">Rakip Kazandı!</div>
+
+        <div class="stats-panel">
+          <div class="stat-item">
+            <div class="stat-label">Süre</div>
+            <div class="stat-value" id="gameTime">0:00</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Güç Kullanımı</div>
+            <div class="stat-value" id="powerUsed">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Top Hızı</div>
+            <div class="stat-value" id="maxSpeed">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Zorluk</div>
+            <div class="stat-value" id="difficultyDisplay">NORMAL</div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn" id="retryBtn">Yeniden Oyna</button>
+          <button class="btn secondary" id="menuBtn">Ana Menü</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+// ==================== GAME STATE ====================
+const gameState = {
+  screen: 'loading',
+  theme: 'neon',
+  sound: true,
+  difficulty: 'normal',
+  target: 5,
+  lang: 'tr',
+  
+  running: false,
+  paused: false,
+  playerScore: 0,
+  enemyScore: 0,
+  gameStartTime: 0,
+  
+  particles: [],
+  powers: [],
+  activePowers: {},
+  maxSpeed: 0,
+  powerUsedCount: 0
+};
+
+// ==================== HIGH SCORES ====================
+let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+
+function saveHighScore(score) {
+  highScores.push(score);
+  highScores.sort((a, b) => b.points - a.points);
+  highScores = highScores.slice(0, 10);
+  localStorage.setItem('highScores', JSON.stringify(highScores));
+}
+
+function displayHighScores() {
+  const panel = document.getElementById('highScoresList');
+  if (!highScores.length) {
+    panel.innerHTML = '<div style="color: var(--theme-accent); text-align: center;">Henüz skor yok</div>';
+    return;
+  }
+  panel.innerHTML = highScores.map((score, idx) => `
+    <div class="score-entry">
+      <span class="score-rank">#${idx + 1}</span>
+      <span class="score-name">${score.name || 'Anonymous'}</span>
+      <span class="score-points">${score.points}</span>
+    </div>
+  `).join('');
+}
+
+// ==================== CANVAS SETUP ====================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// ==================== GAME OBJECTS ====================
+const paddles = {
+  player: { x: 0, y: 0, w: 140, h: 24, speed: 9, vx: 0 },
+  enemy: { x: 0, y: 0, w: 140, h: 24 }
+};
+
+const ball = {
+  x: 0,
+  y: 0,
+  r: 12,
+  vx: 0,
+  vy: 0,
+  trail: [],
+  maxTrailLength: 15
+};
+
+const keys = { ArrowLeft: false, ArrowRight: false };
+let pointerX = canvas.width / 2;
+
+// ==================== THEME SYSTEM ====================
+const themes = {
+  neon: {
+    name: 'NEON ARENA',
+    bg: ['#0a0e1a', '#1a0e2a'],
+    primary: '#00ff88',
+    secondary: '#ff00ff',
+    accent: '#00ccff',
+    particle: ['#00ff88', '#ff00ff', '#00ccff']
+  },
+  sunset: {
+    name: 'SUNSET BEACH',
+    bg: ['#2a1a0a', '#3a2a1a'],
+    primary: '#ffaa00',
+    secondary: '#ff6600',
+    accent: '#ffff00',
+    particle: ['#ffaa00', '#ff6600', '#ffff00']
+  },
+  ocean: {
+    name: 'OCEAN DEPTHS',
+    bg: ['#0a1a3a', '#0a2a4a'],
+    primary: '#00ddff',
+    secondary: '#0099ff',
+    accent: '#00ffff',
+    particle: ['#00ddff', '#0099ff', '#00ffff']
+  },
+  forest: {
+    name: 'FOREST TEMPLE',
+    bg: ['#0a2a1a', '#1a3a2a'],
+    primary: '#00ff44',
+    secondary: '#44ff00',
+    accent: '#ffff00',
+    particle: ['#00ff44', '#44ff00', '#ffff00']
+  },
+  cyber: {
+    name: 'CYBER CITY',
+    bg: ['#1a0a2a', '#2a1a3a'],
+    primary: '#ff00ff',
+    secondary: '#00ffff',
+    accent: '#ffff00',
+    particle: ['#ff00ff', '#00ffff', '#ffff00']
+  },
+  crystal: {
+    name: 'CRYSTAL REALM',
+    bg: ['#2a3a4a', '#3a2a4a'],
+    primary: '#ffddff',
+    secondary: '#ddffff',
+    accent: '#ffffdd',
+    particle: ['#ffddff', '#ddffff', '#ffffdd']
+  },
+  fire: {
+    name: 'INFERNO ARENA',
+    bg: ['#3a1a0a', '#4a0a0a'],
+    primary: '#ffaa00',
+    secondary: '#ff0000',
+    accent: '#ffff00',
+    particle: ['#ffaa00', '#ff0000', '#ffff00']
+  }
+};
+
+function setTheme(themeName) {
+  gameState.theme = themeName;
+  document.body.className = `theme-${themeName}`;
+  document.getElementById('themeDisplay').textContent = themes[themeName].name;
+  localStorage.setItem('gameTheme', themeName);
+  
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === themeName);
+  });
+}
+
+// ==================== SOUND SYSTEM ====================
+function playSound(type, frequency = 440, duration = 0.1) {
+  if (!gameState.sound) return;
+  
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.type = 'square';
+    oscillator.frequency.value = frequency;
+    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+    
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + duration);
+  } catch (e) {}
+}
+
+// ==================== PARTICLE SYSTEM ====================
+function createParticles(x, y, count = 20) {
+  const theme = themes[gameState.theme];
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count;
+    const speed = Math.random() * 8 + 4;
+    gameState.particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 60,
+      maxLife: 60,
+      color: theme.particle[Math.floor(Math.random() * theme.particle.length)],
+      size: Math.random() * 6 + 3
+    });
+  }
+}
+
+function updateParticles() {
+  for (let i = gameState.particles.length - 1; i >= 0; i--) {
+    const p = gameState.particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.3;
+    p.life--;
+    
+    if (p.life <= 0) {
+      gameState.particles.splice(i, 1);
+    }
+  }
+}
+
+// ==================== POWER-UP SYSTEM ====================
+const powerTypes = {
+  speedBoost: {
+    name: 'SPEED',
+    color: '#ff0000',
+    apply: () => {
+      ball.vx *= 1.3;
+      ball.vy *= 1.3;
+    }
+  },
+  slowDown: {
+    name: 'SLOW',
+    color: '#0000ff',
+    apply: () => {
+      ball.vx *= 0.7;
+      ball.vy *= 0.7;
+    }
+  },
+  sizeBall: {
+    name: 'BIG BALL',
+    color: '#ffff00',
+    apply: () => {
+      ball.r *= 1.5;
+      gameState.activePowers.bigBall = 300;
+    }
+  },
+  sizePaddle: {
+    name: 'BIG PADDLE',
+    color: '#00ff00',
+    apply: () => {
+      paddles.player.w *= 1.5;
+      gameState.activePowers.bigPaddle = 300;
+    }
+  },
+  doubleBall: {
+    name: 'DOUBLE BALL',
+    color: '#ff00ff',
+    apply: () => {
+      gameState.activePowers.doubleBall = 300;
+    }
+  }
+};
+
+function spawnPowerUp() {
+  const types = Object.keys(powerTypes);
+  const type = types[Math.floor(Math.random() * types.length)];
+  gameState.powers.push({
+    x: Math.random() * (canvas.width - 40) + 20,
+    y: Math.random() * (canvas.height - 200) + 100,
+    r: 15,
+    type,
+    rotation: 0
+  });
+}
+
+function updatePowerUps() {
+  for (let i = gameState.powers.length - 1; i >= 0; i--) {
+    const power = gameState.powers[i];
+    power.rotation += 0.05;
+    
+    const dx = ball.x - power.x;
+    const dy = ball.y - power.y;
+    const dist = Math.hypot(dx, dy);
+    
+    if (dist < ball.r + power.r) {
+      powerTypes[power.type].apply();
+      gameState.powerUsedCount++;
+      showPopup(`+${power.type.toUpperCase()}`);
+      playSound('power', 800, 0.2);
+      createParticles(power.x, power.y, 30);
+      gameState.powers.splice(i, 1);
+      updatePowerIndicator(power.type);
+    }
+  }
+  
+  // Update active power timers
+  for (const [key, timer] of Object.entries(gameState.activePowers)) {
+    gameState.activePowers[key]--;
+    if (gameState.activePowers[key] <= 0) {
+      delete gameState.activePowers[key];
+      if (key === 'bigBall') ball.r /= 1.5;
+      if (key === 'bigPaddle') paddles.player.w /= 1.5;
+    }
+  }
+}
+
+function updatePowerIndicator(type) {
+  const indicator = document.getElementById('powerIndicator');
+  indicator.textContent = powerTypes[type].name;
+  indicator.classList.add('active');
+  setTimeout(() => indicator.classList.remove('active'), 1000);
+}
+
+// ==================== POPUP TEXT ====================
+function showPopup(text) {
+  const popup = document.createElement('div');
+  popup.className = 'popup-text';
+  popup.textContent = text;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 600);
+}
+
+// ==================== GAME LOGIC ====================
+function resetPositions() {
+  paddles.player.x = canvas.width / 2 - paddles.player.w / 2;
+  paddles.player.y = canvas.height - 60;
+  paddles.enemy.x = canvas.width / 2 - paddles.enemy.w / 2;
+  paddles.enemy.y = 40;
+  
+  ball.x = canvas.width / 2;
+  ball.y = canvas.height / 2;
+  
+  const speed = { easy: 5, normal: 7, hard: 9, insane: 12 }[gameState.difficulty];
+  const angle = (Math.random() - 0.5) * Math.PI / 3;
+  ball.vx = Math.cos(angle) * speed * (Math.random() > 0.5 ? 1 : -1);
+  ball.vy = Math.sin(angle) * speed * (Math.random() > 0.5 ? 1 : -1);
+}
+
+function resetBall() {
+  ball.x = canvas.width / 2;
+  ball.y = canvas.height / 2;
+  const speed = { easy: 5, normal: 7, hard: 9, insane: 12 }[gameState.difficulty];
+  const angle = (Math.random() - 0.5) * Math.PI / 3;
+  ball.vx = Math.cos(angle) * speed * (Math.random() > 0.5 ? 1 : -1);
+  ball.vy = Math.sin(angle) * speed * (Math.random() > 0.5 ? 1 : -1);
+}
+
+function startGame() {
+  gameState.running = true;
+  gameState.paused = false;
+  gameState.playerScore = 0;
+  gameState.enemyScore = 0;
+  gameState.particles = [];
+  gameState.powers = [];
+  gameState.activePowers = {};
+  gameState.maxSpeed = 0;
+  gameState.powerUsedCount = 0;
+  gameState.gameStartTime = Date.now();
+  
+  resetPositions();
+  setScreen('game');
+  spawnPowerUp();
+  playSound('start', 800, 0.3);
+  showPopup(`LET'S PLAY!`);
+}
+
+function endGame(playerWon) {
+  gameState.running = false;
+  
+  document.getElementById('finalPlayerScore').textContent = gameState.playerScore;
+  document.getElementById('finalEnemyScore').textContent = gameState.enemyScore;
+  
+  const gameTime = Math.floor((Date.now() - gameState.gameStartTime) / 1000);
+  const minutes = Math.floor(gameTime / 60);
+  const seconds = gameTime % 60;
+  document.getElementById('gameTime').textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+  document.getElementById('powerUsed').textContent = gameState.powerUsedCount;
+  document.getElementById('maxSpeed').textContent = Math.round(gameState.maxSpeed * 10) / 10;
+  document.getElementById('difficultyDisplay').textContent = gameState.difficulty.toUpperCase();
+  
+  if (playerWon) {
+    document.getElementById('winnerMessage').textContent = 'ZAFER!';
+    document.getElementById('winnerMessage').style.color = themes[gameState.theme].primary;
+    playSound('win', 1200, 0.5);
+    
+    const score = {
+      points: gameState.playerScore * 100 + gameState.powerUsedCount * 10,
+      name: 'Player',
+      date: new Date().toLocaleDateString(),
+      theme: gameState.theme
+    };
+    saveHighScore(score);
+    displayHighScores();
+  } else {
+    document.getElementById('winnerMessage').textContent = 'Rakip Kazandı';
+    document.getElementById('winnerMessage').style.color = themes[gameState.theme].secondary;
+    playSound('lose', 300, 0.5);
+  }
+  
+  setScreen('gameOver');
+}
+
+// ==================== UPDATE ====================
+function updatePaddles() {
+  // Player paddle
+  if (keys.ArrowLeft) paddles.player.vx = -paddles.player.speed;
+  else if (keys.ArrowRight) paddles.player.vx = paddles.player.speed;
+  else paddles.player.vx *= 0.8;
+  
+  if (pointerX) {
+    const targetX = pointerX - paddles.player.w / 2;
+    paddles.player.x += (targetX - paddles.player.x) * 0.15;
+  } else {
+    paddles.player.x += paddles.player.vx;
+  }
+  
+  paddles.player.x = Math.max(0, Math.min(canvas.width - paddles.player.w, paddles.player.x));
+  
+  // Enemy AI
+  const difficulty = { easy: 0.05, normal: 0.1, hard: 0.15, insane: 0.22 }[gameState.difficulty];
+  const targetX = ball.x - paddles.enemy.w / 2;
+  paddles.enemy.x += (targetX - paddles.enemy.x) * difficulty;
+  paddles.enemy.x = Math.max(0, Math.min(canvas.width - paddles.enemy.w, paddles.enemy.x));
+}
+
+function updateBall() {
+  ball.trail.push({ x: ball.x, y: ball.y });
+  if (ball.trail.length > ball.maxTrailLength) ball.trail.shift();
+  
+  ball.x += ball.vx;
+  ball.y += ball.vy;
+  
+  const currentSpeed = Math.hypot(ball.vx, ball.vy);
+  if (currentSpeed > gameState.maxSpeed) gameState.maxSpeed = currentSpeed;
+  
+  // Wall collision
+  if (ball.x - ball.r < 0 || ball.x + ball.r > canvas.width) {
+    ball.vx *= -1;
+    ball.x = Math.max(ball.r, Math.min(canvas.width - ball.r, ball.x));
+    playSound('wall', 600, 0.15);
+    createParticles(ball.x, ball.y, 12);
+  }
+  
+  // Paddle collision
+  checkPaddleCollision(paddles.player, false);
+  checkPaddleCollision(paddles.enemy, true);
+  
+  // Scoring
+  if (ball.y > canvas.height) {
+    gameState.enemyScore++;
+    document.getElementById('enemyScore').textContent = gameState.enemyScore;
+    playSound('score', 500, 0.2);
+    createParticles(ball.x, ball.y, 25);
+    
+    if (gameState.enemyScore >= gameState.target) {
+      endGame(false);
+    } else {
+      resetBall();
+      if (Math.random() > 0.7) spawnPowerUp();
+    }
+  }
+  
+  if (ball.y < 0) {
+    gameState.playerScore++;
+    document.getElementById('playerScore').textContent = gameState.playerScore;
+    playSound('score', 700, 0.2);
+    createParticles(ball.x, ball.y, 25);
+    
+    if (gameState.playerScore >= gameState.target) {
+      endGame(true);
+    } else {
+      resetBall();
+      if (Math.random() > 0.7) spawnPowerUp();
+    }
+  }
+}
+
+function checkPaddleCollision(paddle, isEnemy) {
+  if (
+    ball.y + ball.r >= paddle.y &&
+    ball.y - ball.r <= paddle.y + paddle.h &&
+    ball.x >= paddle.x &&
+    ball.x <= paddle.x + paddle.w &&
+    ((isEnemy && ball.vy < 0) || (!isEnemy && ball.vy > 0))
+  ) {
+    const hitPos = (ball.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
+    ball.vx = hitPos * 12;
+    ball.vy = (isEnemy ? 1 : -1) * Math.sqrt(144 - ball.vx * ball.vx);
+    ball.y = isEnemy ? paddle.y + paddle.h + ball.r : paddle.y - ball.r;
+    
+    playSound('paddle', isEnemy ? 400 : 800, 0.15);
+    createParticles(ball.x, ball.y, 15);
+  }
+}
+
+// ==================== RENDERING ====================
+function drawBackground() {
+  const theme = themes[gameState.theme];
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, theme.bg[0]);
+  gradient.addColorStop(1, theme.bg[1]);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Grid pattern
+  ctx.strokeStyle = `rgba(255, 255, 255, 0.05)`;
+  ctx.lineWidth = 1;
+  for (let i = 0; i < canvas.width; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, canvas.height);
+    ctx.stroke();
+  }
+  for (let i = 0; i < canvas.height; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(canvas.width, i);
+    ctx.stroke();
+  }
+  
+  // Center line
+  ctx.setLineDash([10, 10]);
+  ctx.strokeStyle = `rgba(255, 255, 255, 0.1)`;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(canvas.width / 2, 0);
+  ctx.lineTo(canvas.width / 2, canvas.height);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawPaddles() {
+  const theme = themes[gameState.theme];
+  
+  // Enemy paddle
+  ctx.fillStyle = theme.secondary;
+  ctx.shadowColor = theme.secondary;
+  ctx.shadowBlur = 20;
+  drawRoundRect(ctx, paddles.enemy.x, paddles.enemy.y, paddles.enemy.w, paddles.enemy.h, 12);
+  ctx.fill();
+  
+  // Player paddle
+  ctx.fillStyle = theme.primary;
+  ctx.shadowColor = theme.primary;
+  ctx.shadowBlur = 20;
+  drawRoundRect(ctx, paddles.player.x, paddles.player.y, paddles.player.w, paddles.player.h, 12);
+  ctx.fill();
+  
+  ctx.shadowBlur = 0;
+}
+
+function drawBall() {
+  const theme = themes[gameState.theme];
+  
+  // Trail
+  for (let i = 0; i < ball.trail.length; i++) {
+    const alpha = i / ball.trail.length * 0.3;
+    ctx.fillStyle = `rgba(${hexToRgb(theme.accent).join(', ')}, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(ball.trail[i].x, ball.trail[i].y, ball.r * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // Main ball
+  ctx.fillStyle = theme.accent;
+  ctx.shadowColor = theme.accent;
+  ctx.shadowBlur = 30;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Shine effect
+  const gradient = ctx.createRadialGradient(ball.x - ball.r/3, ball.y - ball.r/3, 0, ball.x, ball.y, ball.r);
+  gradient.addColorStop(0, `rgba(255, 255, 255, 0.6)`);
+  gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.shadowBlur = 0;
+}
+
+function drawPowerUps() {
+  const theme = themes[gameState.theme];
+  
+  for (const power of gameState.powers) {
+    const powerType = powerTypes[power.type];
+    
+    ctx.save();
+    ctx.translate(power.x, power.y);
+    ctx.rotate(power.rotation);
+    
+    ctx.fillStyle = powerType.color;
+    ctx.shadowColor = powerType.color;
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(0, 0, power.r, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Glow ring
+    ctx.strokeStyle = powerType.color;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, power.r + 8, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    ctx.restore();
+  }
+}
+
+function drawParticles() {
+  for (const p of gameState.particles) {
+    const alpha = p.life / p.maxLife;
+    ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawRoundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [
+    parseInt(result[1], 16),
+    parseInt(result[2], 16),
+    parseInt(result[3], 16)
+  ] : [0, 0, 0];
+}
+
+// ==================== SCREEN MANAGEMENT ====================
+function setScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const screenMap = {
+    'loading': 'loadingScreen',
+    'menu': 'menuScreen',
+    'game': 'gameScreen',
+    'gameOver': 'gameOverScreen'
+  };
+  document.getElementById(screenMap[name]).classList.add('active');
+  gameState.screen = name;
+}
+
+// ==================== EVENT HANDLERS ====================
+document.getElementById('playBtn').addEventListener('click', startGame);
+document.getElementById('retryBtn').addEventListener('click', startGame);
+document.getElementById('menuBtn').addEventListener('click', () => setScreen('menu'));
+
+document.getElementById('pauseBtn').addEventListener('click', () => {
+  if (!gameState.running) return;
+  gameState.paused = !gameState.paused;
+  document.getElementById('pauseBtn').textContent = gameState.paused ? 'DEVAM ET' : 'DURAKLAT';
+  if (gameState.paused) showPopup('DURAKLATILDI');
+  else showPopup('DEVAM');
+});
+
+document.getElementById('leftBtn').addEventListener('pointerdown', () => keys.ArrowLeft = true);
+document.getElementById('leftBtn').addEventListener('pointerup', () => keys.ArrowLeft = false);
+document.getElementById('rightBtn').addEventListener('pointerdown', () => keys.ArrowRight = true);
+document.getElementById('rightBtn').addEventListener('pointerup', () => keys.ArrowRight = false);
+
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+});
+
+document.getElementById('soundToggle').addEventListener('click', (e) => {
+  gameState.sound = !gameState.sound;
+  e.target.classList.toggle('on');
+  localStorage.setItem('gameSound', gameState.sound);
+});
+
+document.getElementById('difficultySelect').addEventListener('change', (e) => {
+  gameState.difficulty = e.target.value;
+  localStorage.setItem('gameDifficulty', gameState.difficulty);
+});
+
+document.getElementById('targetSelect').addEventListener('change', (e) => {
+  gameState.target = parseInt(e.target.value);
+  localStorage.setItem('gameTarget', gameState.target);
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') keys.ArrowLeft = true;
+  if (e.key === 'ArrowRight') keys.ArrowRight = true;
+  if (e.key === ' ') {
+    e.preventDefault();
+    document.getElementById('pauseBtn').click();
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft') keys.ArrowLeft = false;
+  if (e.key === 'ArrowRight') keys.ArrowRight = false;
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  if (gameState.screen === 'game') {
+    pointerX = e.clientX;
+  }
+});
+
+// ==================== GAME LOOP ====================
+function gameLoop() {
+  if (gameState.running && !gameState.paused) {
+    updatePaddles();
+    updateBall();
+    updateParticles();
+    updatePowerUps();
+  }
+  
+  drawBackground();
+  drawPowerUps();
+  drawParticles();
+  drawPaddles();
+  drawBall();
+  
+  requestAnimationFrame(gameLoop);
+}
+
+// ==================== INITIALIZATION ====================
+function init() {
+  const savedTheme = localStorage.getItem('gameTheme') || 'neon';
+  const savedDifficulty = localStorage.getItem('gameDifficulty') || 'normal';
+  const savedTarget = parseInt(localStorage.getItem('gameTarget') || '5');
+  const savedSound = localStorage.getItem('gameSound') !== 'false';
+  
+  gameState.theme = savedTheme;
+  gameState.difficulty = savedDifficulty;
+  gameState.target = savedTarget;
+  gameState.sound = savedSound;
+  
+  setTheme(savedTheme);
+  document.getElementById('difficultySelect').value = savedDifficulty;
+  document.getElementById('targetSelect').value = savedTarget;
+  
+  if (savedSound) {
+    document.getElementById('soundToggle').classList.add('on');
+  } else {
+    document.getElementById('soundToggle').classList.remove('on');
+  }
+  
+  displayHighScores();
+  
+  setTimeout(() => {
+    setScreen('menu');
+  }, 2000);
+  
+  gameLoop();
+}
+
+init();
+  </script>
+</body>
+</html>
